@@ -3,7 +3,8 @@ using System.Linq;
 using dio.bank.Enums;
 using dio.bank.Models;
 using System.Collections.Generic;
- 
+using dio.bank.helper;
+
 namespace dio.bank {
     class Program {
         static IList<Conta> _listaContas = new List<Conta>();
@@ -66,15 +67,14 @@ namespace dio.bank {
             if(!_listaContas.Any()) {
                 Console.WriteLine("Nenhuma conta para listar!");
                 Console.WriteLine();
-                Console.WriteLine("Pressione uma tecla para continuar!");
-                Console.ReadKey();
+                msg.AvisoRetornoMenu();
                 return;
             }
 
-            Console.WriteLine($"#id     |     Nome          ")            
             foreach(var conta in _listaContas) {
                 Console.WriteLine($"#{_listaContas.IndexOf(conta)} - {conta}");
             }
+            Console.WriteLine("Pressione uma tecla para retornar ao menu principal");
             Console.ReadKey();
         }
         private static void InserirConta() {
@@ -96,13 +96,54 @@ namespace dio.bank {
         }
         private static void Transferir(){}
         private static void Sacar(){
-            Console.WriteLine("Sacar em sua conta");
+            Console.WriteLine("Módulo de Saque");
             Console.WriteLine();
-            Console.WriteLine("Informe o id da conta que deseja sacar.");
+            Console.WriteLine("Informe o número da conta.");
             var id = int.Parse(Console.ReadLine());
+            if(id < 0 || _listaContas[id] is null || !_listaContas.Any()) {
+                Console.WriteLine("Número de conta inválido!");
+                msg.AvisoRetornoMenu("Operação cancelada");
+                return;
+            }
+
+            Console.WriteLine("Informe o valor para sacar.");
+            var valorDeposito = decimal.Parse(Console.ReadLine());
+            if(valorDeposito <= 0) {
+                Console.WriteLine("Valor para depósito inválido!");
+                msg.AvisoRetornoMenu("Operação cancelada");
+                return;
+            }
+            var conta = _listaContas[id];
+            conta.Sacar(valorDeposito);
+            msg.AvisoRetornoMenu();
+            return;
         }
-        private static void Depositar(){}
-        private static void LimparTela(){}
-        private static void Sair(){}
+        private static void Depositar(){
+            Console.WriteLine("Módulo de Depósito de dinheiro!");
+            Console.WriteLine();
+            
+            Console.WriteLine("Informe o número da conta.");
+            var id = int.Parse(Console.ReadLine());
+            if(id < 0 || _listaContas[id] is null || !_listaContas.Any()) {
+                Console.WriteLine("Número de conta inválido!");
+                msg.AvisoRetornoMenu("Operação cancelada");
+                return;
+            }
+
+            Console.WriteLine("Informe o valor para depósito.");
+            var valorDeposito = decimal.Parse(Console.ReadLine());
+            if(valorDeposito <= 0) {
+                Console.WriteLine("Valor para depósito inválido!");
+                msg.AvisoRetornoMenu("Operação cancelada");
+                return;
+            }
+            var conta = _listaContas[id];
+            conta.Depositar(valorDeposito);
+            msg.AvisoRetornoMenu();
+            return;
+        }
+        private static void LimparTela(){
+            Console.Clear();
+        }
     }
 }

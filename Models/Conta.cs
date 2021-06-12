@@ -1,8 +1,11 @@
 using dio.bank.Enums;
+using dio.bank.helper;
 using System;
 
 namespace dio.bank.Models {
     public class Conta {
+        private const string erroOperacao = "Opercação Cancelada";
+
         public Conta(string nome, decimal saldo, decimal credito, TipoConta tipoConta) {
             Nome = nome;
             Saldo = saldo;
@@ -17,17 +20,22 @@ namespace dio.bank.Models {
 
         public void Depositar(decimal valorDeposito) {
             if(valorDeposito <= 0) { 
-                Console.WriteLine($"Depósito cancelado, valor incorreto {valorDeposito:C2}");
+                Console.WriteLine($"Valor incorreto {valorDeposito:C2}");
+                msg.AvisoRetornoMenu(erroOperacao);
                 return;
             }
             
-            if (Creditar(valorDeposito) is true)
+            if (Creditar(valorDeposito) is true) {
                 Console.WriteLine($"Depósito efetuado com sucesso. Seu saldo atual é de: {Saldo:C2}");
-            else
+                // msg.AvisoRetornoMenu();
+            } else {
                 Console.WriteLine("Houve um erro não tratato, chame o suporte.");
+                msg.AvisoRetornoMenu(erroOperacao);
+            }
         }
 
         public void Sacar(decimal valorSaque) {
+            //Se não houver saldo disponível
             if(valorSaque > Saldo + Credito) {
                 Console.WriteLine("Não foi possível efetuar o seu saque. Saldo insuficiente:");
                 Console.WriteLine();
@@ -35,6 +43,8 @@ namespace dio.bank.Models {
                 Console.WriteLine($"Crédito: {Credito:C2}. {Environment.NewLine}");
                 Console.WriteLine("-------------------------------------");
                 Console.WriteLine($"Disponível para saque: {(Saldo+Credito):C2}");
+                msg.AvisoRetornoMenu("Operacao Cancelada");
+                return;
             }
 
             Debitar(valorSaque);
@@ -51,7 +61,7 @@ namespace dio.bank.Models {
                 return false;
             }
 
-            if(!saldoBloqueado) {
+            if(saldoBloqueado) {
                 Console.WriteLine("Saldo Bloqueado");
                 return false;
             }
@@ -72,13 +82,15 @@ namespace dio.bank.Models {
         public void Transferir(Conta conta, decimal valorTransferencia) {
             if(Debitar(valorTransferencia).Equals(false) || (conta.Creditar(valorTransferencia).Equals(false))) {
                 Console.WriteLine();
-                Console.WriteLine($"Erro ao transferir. Operação cancelada");
+                Console.WriteLine($"Erro ao transferir.");
+                msg.AvisoRetornoMenu(erroOperacao);
             } else
                 Console.WriteLine($"Transferência efetuado com sucesso, seu saldo atual é de :{Saldo:C2}");
+                msg.AvisoRetornoMenu();
         }
 
         public override string ToString() {
-            var retorno  = $"{TipoConta} | {Nome} | {Saldo} | {Credito} ";
+            var retorno  = $"Tipo: {TipoConta} | Nome: {Nome} | Saldo: {Saldo:C2} | Crédito: {Credito:C2} ";
             return retorno;
         }
     }
