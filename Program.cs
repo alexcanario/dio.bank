@@ -33,7 +33,6 @@ namespace dio.bank {
                         LimparTela();
                         break;
                     case "X":
-                        Sair();
                         break;
                     default:
                         Console.WriteLine("Opção inválida!");
