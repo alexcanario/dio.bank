@@ -1,4 +1,4 @@
-namespace dio.bank.Enum {
+namespace dio.bank.Enums {
     public enum TipoConta {
         PessoaFisica = 1,
         PessoaJuridica

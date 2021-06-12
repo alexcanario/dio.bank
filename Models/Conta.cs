@@ -1,4 +1,4 @@
-using dio.bank.Enum;
+using dio.bank.Enums;
 using System;
 
 namespace dio.bank.Models {
@@ -21,8 +21,10 @@ namespace dio.bank.Models {
                 return;
             }
             
-            Debitar(valorDeposito);
-            Console.WriteLine($"Depósito efetuado com sucesso. Seu saldo atual é de: {Saldo:C2}");
+            if (Creditar(valorDeposito) is true)
+                Console.WriteLine($"Depósito efetuado com sucesso. Seu saldo atual é de: {Saldo:C2}");
+            else
+                Console.WriteLine("Houve um erro não tratato, chame o suporte.");
         }
 
         public void Sacar(decimal valorSaque) {
@@ -35,32 +37,49 @@ namespace dio.bank.Models {
                 Console.WriteLine($"Disponível para saque: {(Saldo+Credito):C2}");
             }
 
-            Creditar(valorSaque);
-
+            Debitar(valorSaque);
             Console.WriteLine($"Saque efetuado com sucesso, seu saldo atual é de :{Saldo:C2}");
         }
 
-        private void Creditar(decimal valor) {
+        
+        private bool Debitar(decimal valor) {
+            var temSaldo = valor <= (Saldo + Credito);
+            var saldoBloqueado = false;
+
+            if(!temSaldo) {
+                Console.WriteLine("Saldo Insuficiente");
+                return false;
+            }
+
+            if(!saldoBloqueado) {
+                Console.WriteLine("Saldo Bloqueado");
+                return false;
+            }
+
             Saldo -= valor;
             if(Saldo < 0) {
                 Credito += Saldo;
                 Saldo = 0;
             }
+            return true;
         }
 
-        private void Debitar(decimal valor) {
+        private bool Creditar(decimal valor) {
             Saldo += valor;
+            return true;
         }
 
         public void Transferir(Conta conta, decimal valorTransferencia) {
-            if(valorTransferencia < (conta.Saldo + conta.Credito)) {
-                Console.WriteLine($"Saldo Insufciente, transferência cancelada. Saldo: {conta.Saldo:C2}");
-                return;
-            }
+            if(Debitar(valorTransferencia).Equals(false) || (conta.Creditar(valorTransferencia).Equals(false))) {
+                Console.WriteLine();
+                Console.WriteLine($"Erro ao transferir. Operação cancelada");
+            } else
+                Console.WriteLine($"Transferência efetuado com sucesso, seu saldo atual é de :{Saldo:C2}");
+        }
 
-            Creditar(valorTransferencia);
-            conta.Debitar(valorTransferencia);
-            Console.WriteLine($"Transferência efetuado com sucesso, seu saldo atual é de :{Saldo:C2}");
+        public override string ToString() {
+            var retorno  = $"{TipoConta} | {Nome} | {Saldo} | {Credito} ";
+            return retorno;
         }
     }
 }
